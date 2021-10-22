@@ -1,3 +1,5 @@
 # MATLAB-WSPR-Decoder
 This project involves using Matlab to record audio signal data, sychronise and decode wspr messages. I have used my own algorithm and built in matlab functions to capture the audio, sync and identify candidate signal frequencies. The channel symbol decoding algorithm is provided Refernece credit to Dr. Jonathon Y. Cheah (NZ0C) whose code is derived in turn from from the original wsprd.c code, part of program wsprd, a detector/demodulator/decoder  for the Weak Signal Propagation Reporter (WSPR) mode.    File name: wsprd.c    Copyright 2001-2018, Joe Taylor, K1JT    Much of the present code is based on work by Steven Franke, K9AN,  which in turn was based on earlier work by K1JT 
-Matlab scripts were created and executed in R2017a.
+Matlab scripts were created and executed in R2017a. 
+
+The main working script currently is xcorreover.m but I have also included a lot of my earlier attempts.  It is quite a crude algorithm and is a work in progress as I started from having little knowledge of how to implement it. It is only capable of one decode at a time i.e. the strongest signal.  Over time I will increase it's functuinality and optimize the code where possible.

@@ -69,20 +69,25 @@ fs = 12000;
 %%
 Fcon=abs(fft(clip));
 Fcon=resample(Fcon,1,162);
-testpat=[zeros(1,1028) 1 1 1 1 zeros(1,7160)];
+testpat=[zeros(1,1024) 1 1 1 1 zeros(1,7164)];
 
 Fcand=xcorr(Fcon,testpat);
 Fcand=Fcand(8000:8400);
 
 [xrr,locrr]=findpeaks(Fcand);
 [xrrmax locrrmax]=max(xrr);
-Fcandmax=locrr(locrrmax)-192+1025;
-Fcandmax=Fcandmax+2;
+Fcandmax=locrr(locrrmax)-192+1024;
+Fcandmax=Fcandmax-1;
 Fcandmax=Fcandmax*12000/8192;
+
+
 %%
 F_required = Fcandmax;
 index = 1; step = (F_required/fs)*sintablen;
 for iii = 1:8192
+     if index<0.5
+        index=1;
+    end
     sin1500Hz(iii) = SINTAB(round(index));
     index = index+step;
     if index>sintablen
@@ -90,9 +95,12 @@ for iii = 1:8192
     end
 end
 %%
-F_required = Fcandmax+(12000/8192);
+F_required = Fcandmax+(12000/12);
 index = 1; step = (F_required/fs)*sintablen;
 for iii = 1:8192
+    if index<0.5
+        index=1;
+    end
     sin1501Hz(iii) = SINTAB(round(index));
     index = index+step;
     if index>sintablen
@@ -104,6 +112,9 @@ end
 F_required = Fcandmax+(24000/8192);
 index = 1; step = (F_required/fs)*sintablen;
 for iii = 1:8192
+     if index<0.5
+        index=1;
+    end
     sin1502Hz(iii) = SINTAB(round(index));
     index = index+step;
     if index>sintablen
@@ -115,6 +126,9 @@ end
 F_required = Fcandmax+(36000/8192);
 index = 1; step = (F_required/fs)*sintablen;
 for iii = 1:8192
+     if index<0.5
+        index=1;
+    end
     sin1504Hz(iii) = SINTAB(round(index));
     index = index+step;
     if index>sintablen
@@ -147,22 +161,30 @@ FS=length(FSK)/L
 %[n,fo,ao,w] = firpmord([1500 1800],[1 0],[0.001 0.01],8192);
 %b = firpm(n,fo,ao,w);
 
-Fs = 8192; Wo = (Fcandmax*8192/12000)/(Fs/2);  BW = 15/(Fs/2);
+Fs = 8192; Wo = (Fcandmax*8192/12000)/(Fs/2);  BW = 10/(Fs/2);
        [b,a] = iirpeak(Wo,BW);
-   %    fvtool(b,a);
-clip=filter(b,a,clip);
+   %   fvtool(b,a);
+%clip=filter(b,a,clip);
     
 %%
             xcorr0=xcorr(clip(1:8192),symbol0);
             xcorr1=xcorr(clip(1:8192),symbol1);
             xcorr2=xcorr(clip(1:8192),symbol2);
             xcorr3=xcorr(clip(1:8192),symbol3);
-            xcorr0=xcorr0.^2;
-            xcorr1=xcorr1.^2;
-            xcorr2=xcorr2.^2;
-            xcorr3=xcorr3.^2;
+            %xcorr0=xcorr0.^2;
+            %xcorr1=xcorr1.^2;
+            %xcorr2=xcorr2.^2;
+            %xcorr3=xcorr3.^2;
+            
+    
+            xcorr0=sum(xcorr0(1:8192))-sum(symbol0.^2)/100;
+            xcorr1=sum(xcorr1(1:8192))-sum(symbol1.^2)/100;
+            xcorr2=sum(xcorr2(1:8192))-sum(symbol2.^2)/100;
+            xcorr3=sum(xcorr3(1:8192))-sum(symbol3.^2)/100;
+            
+            xcorropts=[xcorr0 xcorr1 xcorr2 xcorr3];
 
-            xcorropts=[sum(xcorr0(1:8192)) sum(xcorr1(1:8192)) sum(xcorr2(1:8192)) sum(xcorr3(1:8192))];
+            %xcorropts=[sum(xcorr0(1:8192)) sum(xcorr1(1:8192)) sum(xcorr2(1:8192)) sum(xcorr3(1:8192))];
          %xcorropts=[xcorr0(8192) xcorr1(8192) xcorr2(8192) xcorr3(8192)];
           %xcorropts=[max(xcorr0) max(xcorr1) max(xcorr2) max(xcorr3)];
 
@@ -187,13 +209,24 @@ clip=filter(b,a,clip);
         xcorr1=xcorr(clip(start:fin),symbol1);
         xcorr2=xcorr(clip(start:fin),symbol2);
         xcorr3=xcorr(clip(start:fin),symbol3);
-            xcorr0=xcorr0.^2;
-            xcorr1=xcorr1.^2;
-            xcorr2=xcorr2.^2;
-            xcorr3=xcorr3.^2;
+            %xcorr0=xcorr0.^2;
+            %xcorr1=xcorr1.^2;
+            %xcorr2=xcorr2.^2;
+            %xcorr3=xcorr3.^2;
             
+            
+            xcorr0=sum(xcorr0(1:8192))-sum(symbol0.^2)/100;
+            xcorr1=sum(xcorr1(1:8192))-sum(symbol1.^2)/100;
+            xcorr2=sum(xcorr2(1:8192))-sum(symbol2.^2)/100;
+            xcorr3=sum(xcorr3(1:8192))-sum(symbol3.^2)/100;
+            
+            xcorropts=[xcorr0 xcorr1 xcorr2 xcorr3];
+
+            
+            
+         %xcorropts=[sum(xcorr0(1:8192)) sum(xcorr1(1:8192)) sum(xcorr2(1:8192)) sum(xcorr3(1:8192))];
         %xcorropts=[xcorr0(8192) xcorr1(8192) xcorr2(8192) xcorr3(8192)];
-         xcorropts=[max(xcorr0) max(xcorr1) max(xcorr2) max(xcorr3)];
+         %xcorropts=[max(xcorr0) max(xcorr1) max(xcorr2) max(xcorr3)];
 
 
 		xcorrest=max(xcorropts);

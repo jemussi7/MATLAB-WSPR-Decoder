@@ -1,134 +1,7 @@
-close all
-clear all
-clc
-%%
-wsprcvd=audiorecorder(12000,8,1);
-
-%%
-
-    %zz=120
-            ii=1;
-            while ii<120
-              disp('.')
-              pause(1)
-            
-                clk=clock;
-
-                %if clk(6)<=1&&mod(clk(5),2)==0
-                 if clk(6)>=57&&mod(clk(5),2)==1
-                disp('Rx!')
-                recordblocking(wsprcvd,115)
-                ii=120;
-                elseif mod(clk(5),2)==1
-                    ii=ii+1
-                clk = clock;
-                disp('waiting to receive')
-                end
-            end
-            
-            clip=getaudiodata(wsprcvd);
-            noisest=clip(1:8192);
-%% Trim audio clip to correct length
-
-            [xr,locr]=findpeaks(clip);
-            %meanp = mean(xr);
-            [row,colmn]=find(xr>(0.5));
-            begin=locr(row(end))-1327103;
-            clip=clip(begin:locr(row(end)));
-             clipcp=clip;
-             
-             %%
-              
-for jj=2:162
-    		start=((jj-1)*8192+1);
-	  	fin= (jj*8192);
-
-noisest(start:fin)=noisest(1:8192);
-end
-%clipF=fft(clip);
-%noiseF=fft(noisest)*2/1327104;
-%clipF=clipF-noisest;
-%clip=ifft(clipF);
-
-            plot(abs(clip))
-%)%
-pad=(ones(1,1327104-length(clip)))*mean(clip);
-clip=clip';
-clip=[pad clip];
-
-%f4=(1500+(36000/8192))*(8192/12000)
-%f2=(1500+(12000/8192))*(8192/12000)
-%f1=1500*(8192/12000)
-%f3=(1500+(12000/8192))*(8192/12000)
-
-%%
-sintablen = 8192;
-SINTAB = cos(2*pi*(0:sintablen-1)./sintablen);
-fs = 12000;
-
-%%
-Fcon=abs(fft(clip));
-Fcon=resample(Fcon,1,162);
-testpat=[zeros(1,1024) 1 1 1 1 zeros(1,7164)];
-
-Fcand=xcorr(Fcon,testpat);
-Fcand=Fcand(8000:8400);
-
-[xrr,locrr]=findpeaks(Fcand);
-[xrrmax locrrmax]=max(xrr);
-Fcandmax=locrr(locrrmax)-192+1024;
-Fcandmax=Fcandmax-1;
-Fcandmax=Fcandmax*12000/8192;
-
-
-%%
-F_required = Fcandmax;
-index = 1; step = (F_required/fs)*sintablen;
-for iii = 1:8192
-     if index<0.5
-        index=1;
-    end
-    sin1500Hz(iii) = SINTAB(round(index));
-    index = index+step;
-    if index>sintablen
-        index = index-sintablen;
-    end
-end
-%%
-F_required = Fcandmax+(12000/8192);
-index = 1; step = (F_required/fs)*sintablen;
-for iii = 1:8192
-    if index<0.5
-        index=1;
-    end
-    sin1501Hz(iii) = SINTAB(round(index));
-    index = index+step;
-    if index>sintablen
-        index = index-sintablen;
-    end
-end
-
-%%
-F_required = Fcandmax+(24000/8192);
-index = 1; step = (F_required/fs)*sintablen;
-for iii = 1:8192
-     if index<0.5
-        index=1;
-    end
-    sin1502Hz(iii) = SINTAB(round(index));
-    index = index+step;
-    if index>sintablen
-        index = index-sintablen;
-    end
-end
-
 %%
 F_required = Fcandmax+(36000/8192);
 index = 1; step = (F_required/fs)*sintablen;
 for iii = 1:8192
-     if index<0.5
-        index=1;
-    end
     sin1504Hz(iii) = SINTAB(round(index));
     index = index+step;
     if index>sintablen
@@ -137,9 +10,9 @@ for iii = 1:8192
 end
 
 
-%FSK=clip;
-%L=162
-%FS=length(FSK)/L
+FSK=clip;
+L=162
+FS=length(FSK)/L
 %FS=1001
 %tt=0:1/8192:1-1/8192;
 %sym0=cos(2*pi*f1*tt);
@@ -153,72 +26,83 @@ end
     symbol2=sin1502Hz;
     symbol3=sin1504Hz;
     
-    %%
+
+            xcorr0=xcorr(clip(1:8192),symbol0);
+            xcorr1=xcorr(clip(1:8192),symbol1);
+            xcorr2=xcorr(clip(1:8192),symbol2);
+            xcorr3=xcorr(clip(1:8192),symbol3);
+            
+            xcorr0=xcorr0(1:8192).*symbol0;
+            xcorr1=xcorr1(1:8192).*symbol1;
+            xcorr2=xcorr2(1:8192).*symbol2;
+            xcorr3=xcorr3(1:8192).*symbol3;
+            
+            
+            
+            xcorr0=xcorr0.^2;
+            xcorr1=xcorr1.^2;
+            xcorr2=xcorr2.^2;
+            xcorr3=xcorr3.^2;
    
-    %WN=Fcandmax/6000+0.1;
-    
-%BP1=fir1(121,WN,'low'); 
-%[n,fo,ao,w] = firpmord([1500 1800],[1 0],[0.001 0.01],8192);
-%b = firpm(n,fo,ao,w);
+      
 
-%Fs = 8192; Wo = (Fcandmax*8192/12000)/(Fs/2);  BW = 10/(Fs/2);
-   %    [b,a] = iirpeak(Wo,BW);
-   %   fvtool(b,a);
-%clip=filter(b,a,clip);
-    
-%%
-           %%Matched Filter WSPR
+            
+         xcorropts=[sum(xcorr0(1:8192)) sum(xcorr1(1:8192)) sum(xcorr2(1:8192)) sum(xcorr3(1:8192))];
 
- %x = ones(10,1);
- b0 = symbol0(end:-1:1);
- b1 = symbol1(end:-1:1);
- b2 = symbol2(end:-1:1);
- b3 = symbol3(end:-1:1);
- 
- out0 = sum(filter(b0,1,clip(1:8192)).^2);
- out1 = sum(filter(b1,1,clip(1:8192)).^2);
- out2 = sum(filter(b2,1,clip(1:8192)).^2);
- out3 = sum(filter(b3,1,clip(1:8192)).^2);
- 
- matchedopts=[ out0 out1 out2 out3];
- 
- %%
- 	%max()];
-		matchedest=max(matchedopts);
+	
+		%xcorropts=[max()
+		%max()
+		%max()
+		%max()];
+		xcorrest=max(xcorropts);
 		for kk=1:4
-		if matchedest==matchedopts(kk)
+		if xcorrest==xcorropts(kk)
 		rec4sym(1)=kk-1;
 		break
         end
         end
-       %%
-       
-       for jj=2:162
+	
+	for jj=2:162
     		start=((jj-1)*8192+1);
-	  	   fin= (jj*8192);
+	  	fin= (jj*8192);
         
-         out0 = sum(filter(b0,1,clip(start:fin)).^2);
-         out1 = sum(filter(b1,1,clip(start:fin)).^2);
-         out2 = sum(filter(b2,1,clip(start:fin)).^2);
-         out3 = sum(filter(b3,1,clip(start:fin)).^2);
- 
-         matchedopts=[ out0 out1 out2 out3];
-         
-         %%
- 	%max()];
-		matchedest=max(matchedopts);
+        
+            xcorr0=xcorr(clip(start:fin),symbol0);
+            xcorr1=xcorr(clip(start:fin),symbol1);
+            xcorr2=xcorr(clip(start:fin),symbol2);
+            xcorr3=xcorr(clip(start:fin),symbol3);
+        
+            xcorr0=xcorr0(1:8192).*symbol0;
+            xcorr1=xcorr1(1:8192).*symbol1;
+            xcorr2=xcorr2(1:8192).*symbol2;
+            xcorr3=xcorr3(1:8192).*symbol3;
+      
+        
+            
+            xcorr0=xcorr0.^2;
+            xcorr1=xcorr1.^2;
+            xcorr2=xcorr2.^2;
+            xcorr3=xcorr3.^2;
+
+      
+       
+            
+       % xcorropts=[xcorr0(8192) xcorr1(8192) xcorr2(8192) xcorr3(8192)];
+        xcorropts=[sum(xcorr0(1:8192)) sum(xcorr1(1:8192)) sum(xcorr2(1:8192)) sum(xcorr3(1:8192))];
+
+
+		xcorrest=max(xcorropts);
 		for kk=1:4
-		if matchedest==matchedopts(kk)
+		if xcorrest==xcorropts(kk)
 		rec4sym(jj)=kk-1;
 		break
-        end
-        end
-        end
- 
+		end
+		end		
+	end
 
 
-
- %rec4sym=circshift(rec4sym,-1);
+   
+%rec4sym=circshift(rec4sym,-1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Weak Signal Propagation Reporter (WSPR) Recieve Code         %
 %      Refernece credit to Dr. Jonathon Y. Cheah (NZ0C)          %

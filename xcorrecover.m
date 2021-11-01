@@ -95,7 +95,7 @@ for iii = 1:8192
     end
 end
 %%
-F_required = Fcandmax+(12000/12);
+F_required = Fcandmax+(12000/8192);
 index = 1; step = (F_required/fs)*sintablen;
 for iii = 1:8192
     if index<0.5
@@ -163,24 +163,32 @@ FS=length(FSK)/L
 
 Fs = 8192; Wo = (Fcandmax*8192/12000)/(Fs/2);  BW = 10/(Fs/2);
        [b,a] = iirpeak(Wo,BW);
+Fs = 8192; Wo1 = ((Fcandmax*8192/12000)+1)/(Fs/2);  BW1 = 10/(Fs/2);
+       [b1,a1] = iirpeak(Wo1,BW1);
+Fs = 8192; Wo2 = ((Fcandmax*8192/12000)+2)/(Fs/2);  BW2 = 10/(Fs/2);
+       [b2,a2] = iirpeak(Wo2,BW2);
+ Fs = 8192; Wo3 = ((Fcandmax*8192/12000)+3)/(Fs/2);  BW3 = 10/(Fs/2);
+       [b3,a3] = iirpeak(Wo3,BW3);      
    %   fvtool(b,a);
-%clip=filter(b,a,clip);
+%clip=real(filter(b,a,clip));
     
 %%
-            xcorr0=xcorr(clip(1:8192),symbol0);
-            xcorr1=xcorr(clip(1:8192),symbol1);
-            xcorr2=xcorr(clip(1:8192),symbol2);
-            xcorr3=xcorr(clip(1:8192),symbol3);
-            %xcorr0=xcorr0.^2;
-            %xcorr1=xcorr1.^2;
-            %xcorr2=xcorr2.^2;
-            %xcorr3=xcorr3.^2;
+            xcorr0=xcorr(filter(b,a,clip(1:8192)),symbol0);
+            xcorr1=xcorr(filter(b1,a1,clip(1:8192)),symbol1);
+            xcorr2=xcorr(filter(b2,a2,clip(1:8192)),symbol2);
+            xcorr3=xcorr(filter(b3,a3,clip(1:8192)),symbol3);
+            
+            
+            xcorr0=xcorr0.^2;
+            xcorr1=xcorr1.^2;
+            xcorr2=xcorr2.^2;
+            xcorr3=xcorr3.^2;
             
     
-            xcorr0=sum(xcorr0(1:8192))-sum(symbol0.^2)/100;
-            xcorr1=sum(xcorr1(1:8192))-sum(symbol1.^2)/100;
-            xcorr2=sum(xcorr2(1:8192))-sum(symbol2.^2)/100;
-            xcorr3=sum(xcorr3(1:8192))-sum(symbol3.^2)/100;
+            xcorr0=sum(xcorr0(1:8192));
+            xcorr1=sum(xcorr1(1:8192));
+            xcorr2=sum(xcorr2(1:8192));
+            xcorr3=sum(xcorr3(1:8192));
             
             xcorropts=[xcorr0 xcorr1 xcorr2 xcorr3];
 
@@ -205,20 +213,22 @@ Fs = 8192; Wo = (Fcandmax*8192/12000)/(Fs/2);  BW = 10/(Fs/2);
     		start=((jj-1)*8192+1);
 	  	fin= (jj*8192);
         
-        xcorr0=xcorr(clip(start:fin),symbol0);
-        xcorr1=xcorr(clip(start:fin),symbol1);
-        xcorr2=xcorr(clip(start:fin),symbol2);
-        xcorr3=xcorr(clip(start:fin),symbol3);
-            %xcorr0=xcorr0.^2;
-            %xcorr1=xcorr1.^2;
-            %xcorr2=xcorr2.^2;
-            %xcorr3=xcorr3.^2;
+        xcorr0=xcorr(filter(b,a,clip(start:fin)),symbol0);
+        xcorr1=xcorr(filter(b1,a1,clip(start:fin)),symbol1);
+        xcorr2=xcorr(filter(b2,a2,clip(start:fin)),symbol2);
+        xcorr3=xcorr(filter(b3,a3,clip(start:fin)),symbol3);
+        
+
+            xcorr0=xcorr0.^2;
+            xcorr1=xcorr1.^2;
+            xcorr2=xcorr2.^2;
+            xcorr3=xcorr3.^2;
             
             
-            xcorr0=sum(xcorr0(1:8192))-sum(symbol0.^2)/100;
-            xcorr1=sum(xcorr1(1:8192))-sum(symbol1.^2)/100;
-            xcorr2=sum(xcorr2(1:8192))-sum(symbol2.^2)/100;
-            xcorr3=sum(xcorr3(1:8192))-sum(symbol3.^2)/100;
+            xcorr0=sum(xcorr0(1:8192));
+            xcorr1=sum(xcorr1(1:8192));
+            xcorr2=sum(xcorr2(1:8192));
+            xcorr3=sum(xcorr3(1:8192));
             
             xcorropts=[xcorr0 xcorr1 xcorr2 xcorr3];
 

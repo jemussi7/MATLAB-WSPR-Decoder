@@ -76,6 +76,7 @@ Fcand=Fcand(8000:8400);
 Fcandmax=locrr(locrrmax)-192+1025;
 Fcandmax=Fcandmax+2;
 Fcandmax=Fcandmax*12000/8192;
+%Fcandmax=round(Fcandmax,4,'significant');
 %%
 F_required = Fcandmax;
 index = 1; step = (F_required/fs)*sintablen;

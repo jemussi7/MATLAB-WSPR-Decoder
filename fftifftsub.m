@@ -83,7 +83,7 @@ end
     symbol3=sin1504Hz;
     
     symbol0=fft(fliplr(symbol0));
-    symbol1=fft(fliplr(symbol1));
+     symbol1=fft(fliplr(symbol1));
     symbol2=fft(fliplr(symbol2));
     symbol3=fft(fliplr(symbol3));
 
@@ -93,8 +93,9 @@ end
     Fcon2(1,:)=Fcon(1,:).*symbol2;
     Fcon3(1,:)=Fcon(1,:).*symbol3;
 
-            
-         Fconopts=[max(Fcon0(1,1:end/2)) max(Fcon1(1,1:end/2)) max(Fcon2(1,1:end/2)) max(Fcon3(1,1:end/2))];
+          
+         Fconopts=[ sum(abs(ifft(Fcon0(1,:)))) sum(abs(ifft(Fcon1(1,:)))) sum(abs(ifft(Fcon2(1,:)))) sum(abs(ifft(Fcon3(1,:))))];
+
 
 
 		Fconest=max(Fconopts);
@@ -117,8 +118,8 @@ end
     Fcon2(jj,:)=Fcon(jj,:).*symbol2;
     Fcon3(jj,:)=Fcon(jj,:).*symbol3;
 
-
-         Fconopts=[max(Fcon0(jj,1:end/2)) max(Fcon1(jj,1:end/2)) max(Fcon2(jj,1:end/2)) max(Fcon3(jj,1:end/2))];
+ 
+         Fconopts=[ sum(abs(ifft(Fcon0(jj,:)))) sum(abs(ifft(Fcon1(jj,:)))) sum(abs(ifft(Fcon2(jj,:)))) sum(abs(ifft(Fcon3(jj,:))))];
 
 
 		Fconest=max(Fconopts);

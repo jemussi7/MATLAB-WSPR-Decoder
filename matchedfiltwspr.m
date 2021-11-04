@@ -67,8 +67,8 @@ SINTAB = cos(2*pi*(0:sintablen-1)./sintablen);
 fs = 12000;
 
 %%
-Fcon=abs(fft(clip));
-Fcon=resample(Fcon,1,162);
+Fcon=abs(fft(clip,8192));
+%Fcon=resample(Fcon,1,162);
 testpat=[zeros(1,1024) 1 1 1 1 zeros(1,7164)];
 
 Fcand=xcorr(Fcon,testpat);

@@ -1,6 +1,6 @@
 
 clc
-clear a b c d ee i ii
+clear a b c d ee i ii j
 
 %% %Corrected Matlab indexed version
 Nm = [
@@ -273,114 +273,132 @@ ldpc_iters=8;
 
 
 %%parity check large array
- m = zeros(83, 174);
-  for i=1:174
-      for j=1:83
-       m(j,i)=codeword(i);  
+ m = zeros(83, 174);  
+ tic
+ %    m = numpy.zeros((83, 174))
+% m=sparse(m);
+
+  for i=1:174   %for i in range(0, 174):
+      for j=1:83    %for j in range(0, 83):
+       m(j,i)=codeword(i);  %m[j][i] = codeword[i] 
      end
   end  
   %%
- for k=1:ldpc_iters
+ for k=1:ldpc_iters%for iter in range(0, ldpc_iters):
  % iteration large array
-  nmx=Nm;
-  mnx=Mn;
+  nmx=Nm;   %nmx = numpy.array(Nm, dtype=numpy.int32)
+  mnx=Mn;   %mnx = numpy.array(Mn, dtype=numpy.int32)
+
  
-  ee = zeros(83, 174);
+  ee = zeros(83, 174);  %e = numpy.zeros((83, 174))
+ % ee=sparse(ee);
   %ee=['float'];
-  a=0;
+  a=1;
   
-  for j=1:83
+  for j=1:83    %for j in range(0, 83):
       
       for i=1:7  %for i in Nm[j]:
-          if Nm(j,i)<=1  
+          if Nm(j,i)<=1  %if i <= 0:
           continue
           
           end
-          a=1;
-          for ii=1:7 
+         
+          for ii=1:7    %for ii in Nm[j]:
+               a=1;
               if Nm(j,ii)~=i
                   if Nm(j,ii)==1
                       a=a*tanh(m(j,174) / 2);
-                      ee(j,Nm(j,i)-1) = log((1 + a) / (1 - a));
+                     % ee(j,Nm(j,i)-1) = log((1 + a) / (1 - a));
                   end
                   continue
-                  a=a*tanh(m(j,Nm(j,ii)-1) / 2); % INDEXING!!
+                  a=a*tanh(m(j,Nm(j,ii)-1) / 2); % INDEXING!! %a *= math.tanh(m[j][ii-1] / 2.0)
+                  
               end
-                  ee(j,Nm(j,i)-1) = log((1 + a) / (1 - a));
+                  ee(j,Nm(j,i)-1) = log((1 + a) / (1 - a)); %e[j][i-1] = math.log((1 + a) / (1 - a))
           end
       end  
-              
+  end        
    %%   
-   for i=1:7
-              aa=ones(1,83);    %a becomes an array here 83
+   count=0;
+   for i=1:7    %for i in range(0, 7):
+              aa=ones(1,83);    %a becomes an array here 83%a = numpy.ones(83)
               x1=NaN(1,83);
               x2=NaN(1,83);
-              for ii=1:7 %PRODUCT
+              for ii=1:7 %PRODUCT %for ii in range(0, 7):
            
                   if ii ~= i
                       for j1=1:83
-                      if nmx(j1,ii)-1==0
+                      if nmx(j1,ii)==1
                           nmx(j1,ii)=174;
                       end
-                     
-                    x1(j1)=tanh(m((j1), nmx(j1,ii)-1) / 2.0);  %82? INDEXING!!
+                      end
+                      
+                      for j1=1:83
+                    x1(1,j1)=tanh(m((j1), nmx(j1,ii)-1) / 2.0);  %82? INDEXING!! %x1 = numpy.tanh(m[range(0, 83), nmx[:,ii]-1] / 2.0)
                       % x1=tanh(m((1:83), nmx(:,ii)-1) / 2.0);
                      
                     if nmx(j1,ii)>0.0
-                        x2(j1)=x1(1,j1);
+                        x2(1,j1)=x1(1,j1);    %x2 = numpy.where(numpy.greater(nmx[:,ii], 0.0), x1, 1.0)
                     else
-                        x2(j1)=1.0;
+                        x2(1,j1)=1.0;
                     end
                     %x2 = numpy.where(numpy.greater(nmx[:,ii], 0.0), x1, 1.0);
-                    aa = aa.*x2;
-                  
+                    %aa = aa.*x2;    %a = a * x2
+                    aa(1,j1)=aa(1,j1)*x2(1,j1);
+                  count=count+1;
+                      end
                       
                   b=NaN(1,83);
                   c=NaN(1,83);
                   d=NaN(1,83);
                   
-                  for j2=1:83
+                  for j2=1:83   %b = numpy.where(numpy.less(a, 0.99999), a, 0.99)
                     if aa(1,j2)<0.99999
                         b(1,j2)=aa(1,j2);
                     else
                         b(1,j2)=0.99;
                     end
+                  end
                   
-            c(j2) = log((b(j2) + 1.0) / (1.0 - b(j2)));
+                  for j2=1:83
+            c(j2) = log((b(j2) + 1.0) / (1.0 - b(j2))); %c = numpy.log((b + 1.0) / (1.0 - b))
+                  end
+                  
+                  for j2=1:83
+                    if nmx(j2,i)==1
+                     nmx(j2,i)=175
+                        d(j2)=ee(j2,nmx(j2,i)-1);   % d = numpy.where(numpy.equal(nmx[:,i], 0), e[range(0,83), nmx[:,i]-1], c)
+
+                        else
+                            d(j2)=c(j2);
+                        end
+                  end
+                  
             
-            if nmx(j2,i)==1
-                nmx(j2,i)=175
-                d(j2)=ee(j2,nmx(j2,i)-1);
-            else
-                d(j2)=c(j2);
-            end
-            end
+            for j2=1:83
+            ee(j2, nmx(j2,i)-1) = d(j2);    %e[range(0,83), nmx[:,i]-1] = d
             end
             
-           % d = numpy.where(numpy.equal(nmx[:,i], 0),
-              %              e[range(0,83), nmx[:,i]-1],
-                 %           c)
-                % if nmx(j1,i)==1
-                   %  nmx(j1,i)=175
-                 %end
-            ee(j2, nmx(j2,i)-1) = d(j2);
                   end
               
           
+       for j2=1:174
+        e1 = ee(mnx(j2,1)-1,j2);    %e0 = e[mnx[:,0]-1, range(0,174)]
+        e2 = ee(mnx(j2,2)-1,j2);    %e1 = e[mnx[:,1]-1, range(0,174)]
+        e3 = ee(mnx(j2,3)-1,j2);    %e2 = e[mnx[:,2]-1, range(0,174)] %SUM
+       end
        
-        e1 = ee(mnx(:,1)-1);
-        e2 = ee(mnx(:,2)-1);
-        e3 = ee(mnx(:,3)-1); %SUM
-        lll = codeword + e1+ e2+e3;   %ll reused var name
+        lll = codeword + e1+ e2+e3;   %ll reused var name % ll = codeword + e0 + e1 + e2
                        
               end
         end
-     end
+     
        
   
   
   %%
-      cw=ones(174,1)
+      cw=ones(174,1)    %cw = numpy.select( [ ll < 0 ], [ numpy.ones(174, dtype=numpy.int32) ])
+
   for qq=1:174
       if lll(qq,1)>0
           cw(qq,1)=0
@@ -395,23 +413,25 @@ ldpc_iters=8;
 %end
 
 %%
-for j=1:3
-    lll=codeword;
-    if j ~=1
-        e1=ee(mnx(:,1)-1);
+for j2=1:174
+for j=1:3   %for j in range(0, 3):
+    lll=codeword;   %ll = codeword
+    if j ~=1    %if j != 0:
+        e1=ee(mnx(:,1)-1,j2);  %e0 = e[mnx[:,0]-1, range(0,174)]
     end
-    lll=lll+e1;
-     if j~=2
-        e2=ee(mnx(:,2)-1);
+    lll=lll+e1; %ll = ll + e0
+     if j~=2    %if j != 1:
+        e2=ee(mnx(:,2)-1,j2);  %e1 = e[mnx[:,1]-1, range(0,174)]
      end
-     lll=lll+e2;
-     if j~=3
-        e3=ee(mnx(:,3)-1);
+     lll=lll+e2;    %ll = ll + e1
+     if j~=3    %if j != 2:
+        e3=ee(mnx(:,3)-1,j2);  %e2 = e[mnx[:,2]-1, range(0,174)]
     end
-    lll=lll+e3;
+    lll=lll+e3; %ll = ll + e2
     
-    for j2=1:174
-        m(mnx(j2,j)-1)=lll(j2);
+    
+        m(mnx(j2,j)-1,j2)=lll(j2); %m[mnx[:,j]-1, range(0,174)] = ll
     end
 end
 end
+toc

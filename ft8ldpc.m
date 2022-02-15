@@ -328,16 +328,16 @@ ldpc_iters=8;
            
                   if ii ~= i
                       for j1=1:83
-                      if nmx(j1,ii)==1
-                          nmx(j1,ii)=174;
-                      end
+                       if nmx(j1,ii)==1 
+                           nmx(j1,ii)=174;
+                       end 
                       end
                       
-                      for j1=1:83
+                     for j1=1:83
                     x1(1,j1)=tanh(m((j1), nmx(j1,ii)-1) / 2.0);  %82? INDEXING!! %x1 = numpy.tanh(m[range(0, 83), nmx[:,ii]-1] / 2.0)
                       % x1=tanh(m((1:83), nmx(:,ii)-1) / 2.0);
                      
-                    if nmx(j1,ii)>0.0
+                    if Nm(j1,ii)>1.0   %FIX!!
                         x2(1,j1)=x1(1,j1);    %x2 = numpy.where(numpy.greater(nmx[:,ii], 0.0), x1, 1.0)
                     else
                         x2(1,j1)=1.0;
@@ -413,25 +413,32 @@ ldpc_iters=8;
 %end
 
 %%
-for j2=1:174
 for j=1:3   %for j in range(0, 3):
     lll=codeword;   %ll = codeword
+    
     if j ~=1    %if j != 0:
-        e1=ee(mnx(:,1)-1,j2);  %e0 = e[mnx[:,0]-1, range(0,174)]
+        for j2=1:174
+        e1(j2,1)=ee(mnx(j2,1)-1,j2);  %e0 = e[mnx[:,0]-1, range(0,174)]
+        end
     end
     lll=lll+e1; %ll = ll + e0
      if j~=2    %if j != 1:
-        e2=ee(mnx(:,2)-1,j2);  %e1 = e[mnx[:,1]-1, range(0,174)]
+         for j2=1:174
+        e2(j2,1)=ee(mnx(j2,2)-1,j2);  %e1 = e[mnx[:,1]-1, range(0,174)]
+         end
      end
      lll=lll+e2;    %ll = ll + e1
      if j~=3    %if j != 2:
-        e3=ee(mnx(:,3)-1,j2);  %e2 = e[mnx[:,2]-1, range(0,174)]
+         for j2=1:174
+        e3(j2,1)=ee(mnx(j2,3)-1,j2);  %e2 = e[mnx[:,2]-1, range(0,174)]
+         end
     end
     lll=lll+e3; %ll = ll + e2
     
-    
+    for j2=1:174
         m(mnx(j2,j)-1,j2)=lll(j2); %m[mnx[:,j]-1, range(0,174)] = ll
     end
+    end
 end
-end
+
 toc

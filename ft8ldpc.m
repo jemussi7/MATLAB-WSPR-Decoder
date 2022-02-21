@@ -334,7 +334,7 @@ nmx=Nm;   %nmx = numpy.array(Nm, dtype=numpy.int32)
                   if ii ~= i
                       for j1=1:83
                        if nmx(j1,ii)==1 
-                           nmx(j1,ii)=174;
+                           nmx(j1,ii)=175;
                        end 
                       end
                       

@@ -1,6 +1,6 @@
 
 clc
-clear a b c d ee i ii j
+clear a b c d e1 e2 e3 ee i ii j x1 x2
 
 %% %Corrected Matlab indexed version
 Nm = [
@@ -268,9 +268,17 @@ Mn = [
     43    50    58
 ];
 
+x1=NaN(1,83);
+x2=NaN(1,83);
+ b=NaN(1,83);
+ c=NaN(1,83);
+ d=NaN(1,83);
+
 ldpc_iters=8;
 %codeword=[CRC 0];
 
+nmx=Nm;   %nmx = numpy.array(Nm, dtype=numpy.int32)
+  mnx=Mn;   %mnx = numpy.array(Mn, dtype=numpy.int32)
 
 %%parity check large array
  m = zeros(83, 174);  
@@ -286,9 +294,7 @@ ldpc_iters=8;
   %%
  for k=1:ldpc_iters%for iter in range(0, ldpc_iters):
  % iteration large array
-  nmx=Nm;   %nmx = numpy.array(Nm, dtype=numpy.int32)
-  mnx=Mn;   %mnx = numpy.array(Mn, dtype=numpy.int32)
-
+  
  
   ee = zeros(83, 174);  %e = numpy.zeros((83, 174))
  % ee=sparse(ee);
@@ -302,9 +308,9 @@ ldpc_iters=8;
           continue
           
           end
-         
+         a=1;
           for ii=1:7    %for ii in Nm[j]:
-               a=1;
+               
               if Nm(j,ii)~=i
                   if Nm(j,ii)==1
                       a=a*tanh(m(j,174) / 2);
@@ -322,8 +328,7 @@ ldpc_iters=8;
    count=0;
    for i=1:7    %for i in range(0, 7):
               aa=ones(1,83);    %a becomes an array here 83%a = numpy.ones(83)
-              x1=NaN(1,83);
-              x2=NaN(1,83);
+              
               for ii=1:7 %PRODUCT %for ii in range(0, 7):
            
                   if ii ~= i
@@ -348,9 +353,7 @@ ldpc_iters=8;
                   count=count+1;
                       end
                       
-                  b=NaN(1,83);
-                  c=NaN(1,83);
-                  d=NaN(1,83);
+                 
                   
                   for j2=1:83   %b = numpy.where(numpy.less(a, 0.99999), a, 0.99)
                     if aa(1,j2)<0.99999
@@ -361,31 +364,31 @@ ldpc_iters=8;
                   end
                   
                   for j2=1:83
-            c(j2) = log((b(j2) + 1.0) / (1.0 - b(j2))); %c = numpy.log((b + 1.0) / (1.0 - b))
+            c(1,j2) = log((b(1,j2) + 1.0) / (1.0 - b(1,j2))); %c = numpy.log((b + 1.0) / (1.0 - b))
                   end
                   
                   for j2=1:83
                     if nmx(j2,i)==1
                      nmx(j2,i)=175
-                        d(j2)=ee(j2,nmx(j2,i)-1);   % d = numpy.where(numpy.equal(nmx[:,i], 0), e[range(0,83), nmx[:,i]-1], c)
+                        d(1,j2)=ee(j2,nmx(j2,i)-1);   % d = numpy.where(numpy.equal(nmx[:,i], 0), e[range(0,83), nmx[:,i]-1], c)
 
                         else
-                            d(j2)=c(j2);
+                            d(1,j2)=c(1,j2);
                         end
                   end
                   
             
             for j2=1:83
-            ee(j2, nmx(j2,i)-1) = d(j2);    %e[range(0,83), nmx[:,i]-1] = d
+            ee(j2, nmx(j2,i)-1) = d(1,j2);    %e[range(0,83), nmx[:,i]-1] = d
             end
             
                   end
               
           
        for j2=1:174
-        e1 = ee(mnx(j2,1)-1,j2);    %e0 = e[mnx[:,0]-1, range(0,174)]
-        e2 = ee(mnx(j2,2)-1,j2);    %e1 = e[mnx[:,1]-1, range(0,174)]
-        e3 = ee(mnx(j2,3)-1,j2);    %e2 = e[mnx[:,2]-1, range(0,174)] %SUM
+        e1(j2,1) = ee(mnx(j2,1)-1,j2);    %e0 = e[mnx[:,0]-1, range(0,174)]
+        e2(j2,1) = ee(mnx(j2,2)-1,j2);    %e1 = e[mnx[:,1]-1, range(0,174)]
+        e3(j2,1) = ee(mnx(j2,3)-1,j2);    %e2 = e[mnx[:,2]-1, range(0,174)] %SUM
        end
        
         lll = codeword + e1+ e2+e3;   %ll reused var name % ll = codeword + e0 + e1 + e2
@@ -400,8 +403,8 @@ ldpc_iters=8;
       cw=ones(174,1)    %cw = numpy.select( [ ll < 0 ], [ numpy.ones(174, dtype=numpy.int32) ])
 
   for qq=1:174
-      if lll(qq,1)>0
-          cw(qq,1)=0
+      if lll(qq,1)<0
+          cw(qq,1)=1
       end
   end
   
@@ -436,7 +439,7 @@ for j=1:3   %for j in range(0, 3):
     lll=lll+e3; %ll = ll + e2
     
     for j2=1:174
-        m(mnx(j2,j)-1,j2)=lll(j2); %m[mnx[:,j]-1, range(0,174)] = ll
+        m(mnx(j2,j)-1,j2)=lll(j2,1); %m[mnx[:,j]-1, range(0,174)] = ll
     end
     end
 end

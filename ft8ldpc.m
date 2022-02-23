@@ -320,9 +320,11 @@ nmx=Nm;   %nmx = numpy.array(Nm, dtype=numpy.int32)
                   a=a*tanh(m(j,Nm(j,ii)-1) / 2); % INDEXING!! %a *= math.tanh(m[j][ii-1] / 2.0)
                   
               end
-                  ee(j,Nm(j,i)-1) = log((1 + a) / (1 - a)); %e[j][i-1] = math.log((1 + a) / (1 - a))
+                  
           end
+          ee(j,Nm(j,i)-1) = log((1 + a) / (1 - a)); %e[j][i-1] = math.log((1 + a) / (1 - a))
       end  
+      
   end        
    %%   
    count=0;
@@ -403,8 +405,8 @@ nmx=Nm;   %nmx = numpy.array(Nm, dtype=numpy.int32)
       cw=ones(174,1)    %cw = numpy.select( [ ll < 0 ], [ numpy.ones(174, dtype=numpy.int32) ])
 
   for qq=1:174
-      if lll(qq,1)<0
-          cw(qq,1)=1
+      if lll(qq,1)>=0
+          cw(qq,1)=0
       end
   end
   
